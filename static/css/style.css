@@ -1,0 +1,221 @@
+:root {
+    --whibo-primary: #ff6b6b;
+    --whibo-secondary: #4ecdc4;
+    --whibo-success: #45b7d1;
+    --whibo-warning: #ffa726;
+    --whibo-danger: #ef5350;
+    --whibo-dark: #2d3436;
+    --whibo-light: #f8f9fa;
+}
+
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* WhiBO Branding */
+.navbar-brand {
+    font-size: 1.8rem;
+    font-weight: 800;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%) !important;
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%) !important;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+}
+
+.whibo-feature-card {
+    transition: all 0.3s ease;
+}
+
+.whibo-feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2) !important;
+}
+
+/* Buttons */
+.whibo-btn, .download-btn {
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.whibo-btn:hover, .download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.premium-btn {
+    border: 2px solid var(--whibo-danger);
+    background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+    color: white;
+}
+
+.premium-btn:hover {
+    background: linear-gradient(135deg, #ff5252, #ff6b6b);
+    transform: scale(1.05);
+}
+
+.quality-btn {
+    border-left: 4px solid var(--whibo-primary);
+}
+
+.audio-btn {
+    border-left: 4px solid var(--whibo-success);
+}
+
+/* Progress Bar */
+.progress {
+    height: 25px;
+    border-radius: 15px;
+    background: rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, #56ab2f, #a8e6cf);
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+/* Quality Badges */
+.badge {
+    font-size: 0.9rem;
+    border-radius: 20px;
+    padding: 8px 15px;
+}
+
+.bg-purple {
+    background-color: #9c27b0 !important;
+}
+
+/* Input Groups */
+.input-group-lg .form-control {
+    border-radius: 0 25px 25px 0;
+    border: 2px solid #ddd;
+    font-size: 1.1rem;
+}
+
+.input-group-lg .input-group-text {
+    border-radius: 25px 0 0 25px;
+    border: 2px solid #ddd;
+    border-right: none;
+    font-size: 1.2rem;
+}
+
+/* Video Meta */
+.video-meta p {
+    font-size: 0.95rem;
+}
+
+.description-box {
+    max-height: 150px;
+    overflow-y: auto;
+    background: rgba(0,0,0,0.05);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+/* Quality Sections */
+.quality-section {
+    border-bottom: 2px solid rgba(0,0,0,0.1);
+    padding-bottom: 15px;
+}
+
+.quality-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+/* Download Info */
+.download-info p {
+    margin-bottom: 5px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-section h1 {
+        font-size: 2.5rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1.5rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .whibo-feature-card .card-body {
+        padding: 1rem;
+    }
+}
+
+/* Animation Classes */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.pulse-animation {
+    animation: pulse 2s infinite;
+}
+
+/* Footer */
+footer {
+    background: linear-gradient(135deg, #2d3436 0%, #636e72 100%) !important;
+}
+
+/* Loading States */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--whibo-primary);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--whibo-danger);
+}

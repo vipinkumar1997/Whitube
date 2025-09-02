@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Options - WhiBO</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
+                <i class="fas fa-play-circle"></i> WhiBO
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('index') }}">
+                    <i class="fas fa-home"></i> Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Video Information -->
+            <div class="col-lg-7">
+                <div class="card shadow border-0">
+                    <div class="card-header bg-gradient-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Video Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <img src="{{ video_info.thumbnail_url }}" class="img-fluid rounded shadow" alt="Video Thumbnail">
+                            </div>
+                            <div class="col-md-7">
+                                <h4 class="fw-bold">{{ video_info.title }}</h4>
+                                <div class="video-meta mb-3">
+                                    <p class="text-muted mb-1">
+                                        <i class="fas fa-user text-primary"></i> 
+                                        <strong>{{ video_info.author }}</strong>
+                                    </p>
+                                    <p class="text-muted mb-1">
+                                        <i class="fas fa-clock text-warning"></i> 
+                                        Duration: <strong>{{ video_info.length }}</strong>
+                                    </p>
+                                    <p class="text-muted mb-1">
+                                        <i class="fas fa-eye text-success"></i> 
+                                        <strong>{{ video_info.views }}</strong> views
+                                    </p>
+                                    <p class="text-muted mb-3">
+                                        <i class="fas fa-calendar text-info"></i> 
+                                        Published: <strong>{{ video_info.publish_date }}</strong>
+                                    </p>
+                                </div>
+                                <div class="description-box">
+                                    <p class="small">{{ video_info.description }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- High Quality Download Options -->
+            <div class="col-lg-5">
+                <div class="card shadow border-0">
+                    <div class="card-header bg-gradient-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-download"></i> High Quality Download</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Best Quality Options -->
+                        <div class="quality-section mb-4">
+                            <h6 class="text-primary fw-bold mb-3">
+                                <i class="fas fa-crown text-warning"></i> Premium Quality
+                            </h6>
+                            
+                            <button class="btn btn-outline-danger btn-sm mb-2 w-100 download-btn premium-btn" 
+                                    data-url="{{ url }}" 
+                                    data-quality="best_quality" 
+                                    data-type="video">
+                                <i class="fas fa-star"></i> Best Available Quality
+                                <small class="d-block">Automatically selects highest quality</small>
+                            </button>
+                        </div>
+
+                        <!-- Video Quality Options -->
+                        <div class="quality-section mb-4">
+                            <h6 class="text-primary fw-bold mb-3">
+                                <i class="fas fa-video"></i> Video Quality Options
+                            </h6>
+                            {% for stream in video_info.video_streams %}
+                            <button class="btn btn-outline-primary btn-sm mb-2 w-100 download-btn quality-btn" 
+                                    data-url="{{ url }}" 
+                                    data-quality="{{ stream.resolution }}" 
+                                    data-type="{{ stream.type }}">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <i class="fas fa-play-circle"></i> 
+                                        {{ stream.quality_label }}
+                                    </span>
+                                    <small class="text-muted">{{ stream.filesize }} MB</small>
+                                </div>
+                            </button>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Audio Quality Options -->
+                        <div class="quality-section mb-4">
+                            <h6 class="text-success fw-bold mb-3">
+                                <i class="fas fa-music"></i> Audio Only (MP3)
+                            </h6>
+                            {% for stream in video_info.audio_streams[:4] %}
+                            <button class="btn btn-outline-success btn-sm mb-2 w-100 download-btn audio-btn" 
+                                    data-url="{{ url }}" 
+                                    data-quality="{{ stream.abr }}" 
+                                    data-type="audio">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <i class="fas fa-headphones"></i> 
+                                        {{ stream.abr }} Audio
+                                    </span>
+                                    <small class="text-muted">{{ stream.filesize }} MB</small>
+                                </div>
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Download Progress -->
+                <div class="card shadow border-0 mt-3" id="progress-card" style="display: none;">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0">
+                            <i class="fas fa-spinner fa-spin"></i> WhiBO Processing...
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="progress mb-3" style="height: 25px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                                 id="progress-bar" style="width: 0%">
+                                <span id="progress-percentage">0%</span>
+                            </div>
+                        </div>
+                        <div class="download-info">
+                            <p id="progress-text" class="mb-2">Initializing download...</p>
+                            <p id="speed-info" class="small text-muted mb-2"></p>
+                        </div>
+                        <div id="download-link" style="display: none;">
+                            <a href="#" class="btn btn-success w-100" id="download-file-btn">
+                                <i class="fas fa-download"></i> Download Complete - Click to Save
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const downloadButtons = document.querySelectorAll('.download-btn');
+            const progressCard = document.getElementById('progress-card');
+            const progressBar = document.getElementById('progress-bar');
+            const progressPercentage = document.getElementById('progress-percentage');
+            const progressText = document.getElementById('progress-text');
+            const speedInfo = document.getElementById('speed-info');
+            const downloadLink = document.getElementById('download-link');
+            const downloadFileBtn = document.getElementById('download-file-btn');
+
+            let startTime;
+
+            downloadButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const url = this.getAttribute('data-url');
+                    const quality = this.getAttribute('data-quality');
+                    const type = this.getAttribute('data-type');
+
+                    // Show progress card
+                    progressCard.style.display = 'block';
+                    progressBar.style.width = '0%';
+                    progressPercentage.textContent = '0%';
+                    progressText.textContent = 'WhiBO is preparing your download...';
+                    speedInfo.textContent = '';
+                    downloadLink.style.display = 'none';
+                    startTime = Date.now();
+
+                    // Disable all download buttons
+                    downloadButtons.forEach(btn => {
+                        btn.disabled = true;
+                        btn.classList.add('btn-outline-secondary');
+                    });
+
+                    // Scroll to progress card
+                    progressCard.scrollIntoView({ behavior: 'smooth' });
+
+                    // Start download
+                    startDownload(url, quality, type);
+                });
+            });
+
+            function startDownload(url, quality, type) {
+                const formData = new FormData();
+                formData.append('url', url);
+                formData.append('quality', quality);
+                formData.append('type', type);
+
+                fetch('/download', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        checkProgress(data.download_id);
+                    } else {
+                        alert('WhiBO Error: ' + data.message);
+                        resetDownload();
+                    }
+                })
+                .catch(error => {
+                    alert('WhiBO Error: ' + error);
+                    resetDownload();
+                });
+            }
+
+            function checkProgress(downloadId) {
+                const interval = setInterval(() => {
+                    fetch(`/progress/${downloadId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'downloading') {
+                            const progress = data.progress || 0;
+                            progressBar.style.width = progress + '%';
+                            progressPercentage.textContent = progress + '%';
+                            progressText.textContent = `Downloading in high quality... ${progress}%`;
+                            
+                            // Calculate download speed
+                            if (data.downloaded_mb && data.total_mb) {
+                                const elapsedSeconds = (Date.now() - startTime) / 1000;
+                                const speed = (data.downloaded_mb / elapsedSeconds).toFixed(1);
+                                speedInfo.textContent = `Speed: ${speed} MB/s | ${data.downloaded_mb}/${data.total_mb} MB`;
+                            }
+                        } else if (data.status === 'completed') {
+                            clearInterval(interval);
+                            progressBar.style.width = '100%';
+                            progressPercentage.textContent = '100%';
+                            progressText.textContent = 'WhiBO download completed successfully! 🎉';
+                            speedInfo.textContent = 'Ready to download';
+                            downloadFileBtn.href = `/download_file/${downloadId}`;
+                            downloadLink.style.display = 'block';
+                            resetDownload();
+                        } else if (data.status === 'error') {
+                            clearInterval(interval);
+                            alert('WhiBO download failed: ' + data.error);
+                            resetDownload();
+                        }
+                    })
+                    .catch(error => {
+                        clearInterval(interval);
+                        alert('WhiBO error checking progress: ' + error);
+                        resetDownload();
+                    });
+                }, 1000);
+            }
+
+            function resetDownload() {
+                downloadButtons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove('btn-outline-secondary');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
