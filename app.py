@@ -32,7 +32,7 @@ class WhiBO_ClientDownloader:
         self.download_history = []
         self.cleanup_thread = threading.Thread(target=self.cleanup_old_files, daemon=True)
         self.cleanup_thread.start()
-    
+
     def cleanup_old_files(self):
         """Old files ko automatically cleanup kariye"""
         while True:
@@ -58,7 +58,7 @@ class WhiBO_ClientDownloader:
                 print(f"Cleanup error: {e}")
             
             time.sleep(300)  # Check every 5 minutes
-    
+
     def validate_youtube_url(self, url):
         """YouTube URL validate kariye"""
         youtube_regex = re.compile(
@@ -66,7 +66,7 @@ class WhiBO_ClientDownloader:
             r'(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})'
         )
         return youtube_regex.match(url) is not None
-    
+
     def get_video_info(self, url):
         """Video information get kariye"""
         try:
@@ -75,6 +75,7 @@ class WhiBO_ClientDownloader:
             # Video streams
             video_streams = []
             progressive_streams = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc()
+            
             for stream in progressive_streams:
                 if stream.resolution:
                     video_streams.append({
@@ -84,9 +85,10 @@ class WhiBO_ClientDownloader:
                         'type': 'progressive',
                         'quality_label': f"{stream.resolution} (Combined)"
                     })
-            
+
             # Adaptive streams
             adaptive_video_streams = yt.streams.filter(adaptive=True, type='video', file_extension='mp4').order_by('resolution').desc()
+            
             for stream in adaptive_video_streams:
                 if stream.resolution:
                     video_streams.append({
@@ -96,7 +98,7 @@ class WhiBO_ClientDownloader:
                         'type': 'adaptive',
                         'quality_label': f"{stream.resolution} {stream.fps}fps (Video Only)"
                     })
-            
+
             # Remove duplicates
             seen = set()
             unique_streams = []
@@ -105,10 +107,11 @@ class WhiBO_ClientDownloader:
                 if key not in seen:
                     seen.add(key)
                     unique_streams.append(stream)
-            
+
             # Audio streams
             audio_streams = []
             audio_only_streams = yt.streams.filter(only_audio=True).order_by('abr').desc()
+            
             for stream in audio_only_streams:
                 if stream.abr:
                     audio_streams.append({
@@ -116,7 +119,7 @@ class WhiBO_ClientDownloader:
                         'filesize': stream.filesize // (1024 * 1024) if stream.filesize else 0,
                         'audio_codec': getattr(stream, 'audio_codec', 'unknown')
                     })
-            
+
             video_info = {
                 'title': yt.title,
                 'author': yt.author,
@@ -130,9 +133,10 @@ class WhiBO_ClientDownloader:
             }
             
             return video_info, None
+            
         except Exception as e:
             return None, str(e)
-    
+
     def download_video_async(self, url, quality, download_type, download_id, client_ip):
         """Client-specific temporary download"""
         global active_downloads
@@ -147,10 +151,10 @@ class WhiBO_ClientDownloader:
                 'file_size': 0,
                 'client_ip': client_ip
             }
-            
-            yt = YouTube(url, on_progress_callback=lambda stream, chunk, bytes_remaining: 
+
+            yt = YouTube(url, on_progress_callback=lambda stream, chunk, bytes_remaining:
                         self.progress_callback(download_id, stream, chunk, bytes_remaining))
-            
+
             # Stream selection
             if download_type == 'audio':
                 stream = yt.streams.filter(only_audio=True).order_by('abr').desc().first()
@@ -168,28 +172,28 @@ class WhiBO_ClientDownloader:
                     if not stream:
                         stream = yt.streams.get_highest_resolution()
                 filename_suffix = '.mp4'
-            
+
             if not stream:
                 raise Exception("No suitable stream found")
-            
+
             # Create unique filename with timestamp
             safe_title = secure_filename(yt.title)[:50]
             timestamp = str(int(time.time()))
             temp_filename = f"{safe_title}_{timestamp}_{download_id[:8]}"
-            
+
             # Download to temp folder
             download_path = stream.download(
                 output_path=TEMP_DOWNLOAD_FOLDER,
                 filename=temp_filename + filename_suffix
             )
-            
+
             # Rename audio file to .mp3
             if download_type == 'audio':
                 base, ext = os.path.splitext(download_path)
                 new_path = base + '.mp3'
                 os.rename(download_path, new_path)
                 download_path = new_path
-            
+
             # Store file information temporarily
             download_files[download_id] = {
                 'filepath': download_path,
@@ -198,11 +202,11 @@ class WhiBO_ClientDownloader:
                 'client_ip': client_ip,
                 'original_title': yt.title
             }
-            
+
             download_status[download_id]['status'] = 'completed'
             download_status[download_id]['filename'] = os.path.basename(download_path)
             download_status[download_id]['filepath'] = download_path
-            
+
             # Add to history
             self.download_history.append({
                 'title': yt.title,
@@ -212,17 +216,17 @@ class WhiBO_ClientDownloader:
                 'quality': quality,
                 'client_ip': client_ip
             })
-            
+
             print(f"✅ Download completed for client {client_ip}: {yt.title}")
-            
+
         except Exception as e:
             download_status[download_id]['status'] = 'error'
             download_status[download_id]['error'] = str(e)
             print(f"❌ Download failed for client {client_ip}: {str(e)}")
-        
+
         finally:
             active_downloads -= 1
-    
+
     def progress_callback(self, download_id, stream, chunk, bytes_remaining):
         """Download progress callback"""
         total_size = stream.filesize
@@ -232,7 +236,7 @@ class WhiBO_ClientDownloader:
         download_status[download_id]['progress'] = int(percentage)
         download_status[download_id]['downloaded_mb'] = bytes_downloaded // (1024 * 1024)
         download_status[download_id]['total_mb'] = total_size // (1024 * 1024)
-    
+
     def search_videos(self, query, max_results=15):
         """YouTube search functionality"""
         try:
@@ -251,6 +255,7 @@ class WhiBO_ClientDownloader:
                 })
             
             return results, None
+            
         except Exception as e:
             return None, str(e)
 
@@ -258,7 +263,6 @@ class WhiBO_ClientDownloader:
 whibo_downloader = WhiBO_ClientDownloader()
 
 # ===== ALL FLASK ROUTES =====
-
 @app.route('/')
 def index():
     """WhiBO Home page"""
@@ -290,12 +294,11 @@ def get_info():
 def start_download():
     """Start client-side download"""
     global active_downloads
-    
     client_ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
     
     if active_downloads >= MAX_CONCURRENT_DOWNLOADS:
         return jsonify({
-            'success': False, 
+            'success': False,
             'message': f'Server busy. Maximum {MAX_CONCURRENT_DOWNLOADS} downloads allowed'
         })
     
@@ -361,7 +364,7 @@ def download_file(download_id):
     cleanup_thread.start()
     
     return send_file(
-        filepath, 
+        filepath,
         as_attachment=True,
         download_name=file_info['filename']
     )
@@ -420,20 +423,21 @@ def manual_cleanup():
     """Manual server cleanup"""
     try:
         cleaned_count = 0
-        
         for download_id, file_info in list(download_files.items()):
             filepath = file_info['filepath']
             if os.path.exists(filepath):
                 os.remove(filepath)
                 cleaned_count += 1
+            
             download_files.pop(download_id, None)
             download_status.pop(download_id, None)
         
         return jsonify({
-            'success': True, 
+            'success': True,
             'message': f'Cleaned up {cleaned_count} files',
             'cleaned_count': cleaned_count
         })
+        
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
 
@@ -448,7 +452,6 @@ def health_check():
     })
 
 # ===== ERROR HANDLERS =====
-
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template('error.html', 
@@ -462,11 +465,12 @@ def internal_error(error):
                          error_message="Internal server error"), 500
 
 if __name__ == '__main__':
-    print("\n🚀 WhiBO - Client-Side YouTube Downloader Starting...")
-    print("📍 Local access: http://localhost:5000")
-    print("🌐 Network access: http://YOUR_IP:5000")
-    print(f"🗂️  Temp folder: {TEMP_DOWNLOAD_FOLDER}")
+    port = int(os.environ.get('PORT', 5000))
+    print(f"\n🚀 WhiBO - Client-Side YouTube Downloader Starting...")
+    print(f"📍 Local access: http://localhost:{port}")
+    print(f"🌐 Network access: http://YOUR_IP:{port}")
+    print(f"🗂️ Temp folder: {TEMP_DOWNLOAD_FOLDER}")
     print(f"🧹 Auto cleanup: {CLEANUP_AFTER_MINUTES} minutes")
     print(f"👥 Max concurrent: {MAX_CONCURRENT_DOWNLOADS} downloads")
     print("-" * 60)
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=False, host='0.0.0.0', port=port)
