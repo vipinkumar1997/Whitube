@@ -68,9 +68,10 @@ class WhiBO_ClientDownloader:
         return youtube_regex.match(url) is not None
 
     def get_video_info(self, url):
-        """Video information get kariye"""
+        """Video information get kariye - PoToken के साथ"""
         try:
-            yt = YouTube(url)
+            # Use PoToken to avoid bot detection
+            yt = YouTube(url, use_po_token=True)
             
             # Video streams
             video_streams = []
@@ -138,7 +139,7 @@ class WhiBO_ClientDownloader:
             return None, str(e)
 
     def download_video_async(self, url, quality, download_type, download_id, client_ip):
-        """Client-specific temporary download"""
+        """Client-specific temporary download - PoToken के साथ"""
         global active_downloads
         active_downloads += 1
         
@@ -152,7 +153,10 @@ class WhiBO_ClientDownloader:
                 'client_ip': client_ip
             }
 
-            yt = YouTube(url, on_progress_callback=lambda stream, chunk, bytes_remaining:
+            # Use PoToken to avoid bot detection
+            yt = YouTube(url, 
+                        use_po_token=True,
+                        on_progress_callback=lambda stream, chunk, bytes_remaining:
                         self.progress_callback(download_id, stream, chunk, bytes_remaining))
 
             # Stream selection
@@ -238,7 +242,7 @@ class WhiBO_ClientDownloader:
         download_status[download_id]['total_mb'] = total_size // (1024 * 1024)
 
     def search_videos(self, query, max_results=15):
-        """YouTube search functionality"""
+        """YouTube search functionality - PoToken के साथ"""
         try:
             search = Search(query)
             results = []
@@ -466,7 +470,7 @@ def internal_error(error):
 
 # ===== PRODUCTION READY MAIN SECTION =====
 if __name__ == '__main__':
-    # Get PORT from environment variable (Render automatically sets this)
+    # Get PORT from environment variable (for render.com)
     port = int(os.environ.get('PORT', 5000))
     
     print(f"\n🚀 WhiBO - Client-Side YouTube Downloader Starting...")
@@ -474,13 +478,12 @@ if __name__ == '__main__':
     print(f"🗂️ Temp folder: {TEMP_DOWNLOAD_FOLDER}")
     print(f"🧹 Auto cleanup: {CLEANUP_AFTER_MINUTES} minutes")
     print(f"👥 Max concurrent: {MAX_CONCURRENT_DOWNLOADS} downloads")
+    print(f"🛡️ PoToken enabled for bot protection")
     print("-" * 60)
     
-    # Production configuration for Render.com
+    # Production configuration
     app.run(
         debug=False,        # Production mode
         host='0.0.0.0',     # Accept all connections
         port=port           # Use environment PORT
     )
-
-
