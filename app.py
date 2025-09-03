@@ -466,7 +466,7 @@ def internal_error(error):
 
 # ===== PRODUCTION READY MAIN SECTION =====
 if __name__ == '__main__':
-    # Get PORT from environment variable (for render.com)
+    # Get PORT from environment variable (Render automatically sets this)
     port = int(os.environ.get('PORT', 5000))
     
     print(f"\n🚀 WhiBO - Client-Side YouTube Downloader Starting...")
@@ -476,9 +476,11 @@ if __name__ == '__main__':
     print(f"👥 Max concurrent: {MAX_CONCURRENT_DOWNLOADS} downloads")
     print("-" * 60)
     
-    # Production configuration
+    # Production configuration for Render.com
     app.run(
         debug=False,        # Production mode
         host='0.0.0.0',     # Accept all connections
         port=port           # Use environment PORT
     )
+
+
