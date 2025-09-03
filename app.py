@@ -464,13 +464,21 @@ def internal_error(error):
                          error_code=500, 
                          error_message="Internal server error"), 500
 
+# ===== PRODUCTION READY MAIN SECTION =====
 if __name__ == '__main__':
+    # Get PORT from environment variable (for render.com)
     port = int(os.environ.get('PORT', 5000))
+    
     print(f"\n🚀 WhiBO - Client-Side YouTube Downloader Starting...")
-    print(f"📍 Local access: http://localhost:{port}")
-    print(f"🌐 Network access: http://YOUR_IP:{port}")
+    print(f"📍 Running on Port: {port}")
     print(f"🗂️ Temp folder: {TEMP_DOWNLOAD_FOLDER}")
     print(f"🧹 Auto cleanup: {CLEANUP_AFTER_MINUTES} minutes")
     print(f"👥 Max concurrent: {MAX_CONCURRENT_DOWNLOADS} downloads")
     print("-" * 60)
-    app.run(debug=False, host='0.0.0.0', port=port)
+    
+    # Production configuration
+    app.run(
+        debug=False,        # Production mode
+        host='0.0.0.0',     # Accept all connections
+        port=port           # Use environment PORT
+    )
