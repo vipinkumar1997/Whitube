@@ -9,14 +9,15 @@ import re
 import tempfile
 import shutil
 from werkzeug.utils import secure_filename
+import secrets
 
 app = Flask(__name__)
-app.secret_key = 'whibo_secret_key_2025'
+app.secret_key = os.environ.get('SECRET_KEY', 'whibo_secret_key_2025')
 
 # Configuration
-TEMP_DOWNLOAD_FOLDER = 'temp_downloads'
-MAX_CONCURRENT_DOWNLOADS = 5
-CLEANUP_AFTER_MINUTES = 10
+TEMP_DOWNLOAD_FOLDER = os.environ.get('TEMP_DOWNLOAD_FOLDER', 'temp_downloads')
+MAX_CONCURRENT_DOWNLOADS = int(os.environ.get('MAX_CONCURRENT_DOWNLOADS', 5))
+CLEANUP_AFTER_MINUTES = int(os.environ.get('CLEANUP_AFTER_MINUTES', 10))
 
 # Create temp directory
 if not os.path.exists(TEMP_DOWNLOAD_FOLDER):
@@ -314,7 +315,7 @@ def start_download():
         return jsonify({'success': False, 'message': 'Invalid YouTube URL'})
     
     # Generate unique download ID
-    download_id = f"{int(time.time() * 1000)}_{client_ip.replace('.', '')}"
+    download_id = secrets.token_hex(16)
     
     # Start download in background thread
     thread = threading.Thread(
